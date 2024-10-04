@@ -44,8 +44,18 @@ rcutils_strndup(const char * str, size_t max_length, rcutils_allocator_t allocat
     return NULL;
   }
   RCUTILS_CHECK_ALLOCATOR(&allocator, return NULL);
-  char * p = memchr(str, '\0', max_length);
-  size_t string_length = p == NULL ? max_length : (size_t)(p - str);
+  
+ // char * p = memchr(str, '\0', max_length);
+  // size_t string_length = (p == NULL) ? max_length : (size_t)(p - str);
+  // Reimplement memchr() since it doesn't seem to work as expected on Android 5.1
+  size_t string_length = max_length;
+  for (size_t i = 0; i < max_length; ++i) {
+    if (str[i] == '\0') {
+      string_length = i;
+      break;
+    }
+  }
+
   char * new_string = allocator.allocate(string_length + 1, allocator.state);
   if (NULL == new_string) {
     return NULL;
